@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+*.local
+__pycache__/
+
+# Imágenes intermedias pesadas (~140 MB): se regeneran con scripts/upscale.py + prepare-assets.py
+# Se suben: originals/ (fuentes de la IA), las máscaras y public/textures (lo que usa la web)
+assets-src/sources/
+assets-src/base-clean.png
+assets-src/base-2036.png
+assets-src/trash-*.png
+assets-src/props-*.png
