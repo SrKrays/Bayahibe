@@ -93,8 +93,13 @@ export default function Hero() {
               .fromTo('.intro__shade', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8, ease: 'power1.out' })
               .fromTo(
                 '.intro__eyebrow',
-                { autoAlpha: 0, letterSpacing: '0.6em' },
-                { autoAlpha: 1, letterSpacing: '0.26em', duration: 1.2, ease: 'power3.out' },
+                { autoAlpha: 0, letterSpacing: window.innerWidth < 640 ? '0.4em' : '0.6em' },
+                {
+                  autoAlpha: 1,
+                  letterSpacing: window.innerWidth < 640 ? '0.14em' : '0.26em',
+                  duration: 1.2,
+                  ease: 'power3.out',
+                },
                 '<',
               )
               .fromTo(

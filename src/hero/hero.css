@@ -12,6 +12,7 @@
   /* fallback mientras carga Pixi / si no hay WebGL */
   background: var(--ink) url('/textures/base-md.webp') center / cover no-repeat;
   background-image: image-set(url('/textures/base-md.avif') type('image/avif'), url('/textures/base-md.webp') type('image/webp'));
+  background-position: 55% center; /* en vertical, mismo encuadre que el canvas (muelle) */
 }
 
 .hero__frame::after {
@@ -408,6 +409,23 @@
 }
 
 @media (max-width: 640px) {
+  .lapse {
+    top: 84px;
+    gap: 8px;
+    padding: 8px 16px;
+    white-space: nowrap;
+    max-width: calc(100vw - 32px);
+  }
+  .lapse__num {
+    font-size: 24px;
+  }
+  .lapse__label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+  .intro__eyebrow {
+    font-size: 10px;
+  }
   .hero__copy--3 {
     top: auto;
     bottom: 22vh;

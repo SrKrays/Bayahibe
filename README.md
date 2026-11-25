@@ -93,6 +93,16 @@ espera a las texturas en lugar de romperse.
 
 Intensidad de movimiento: `config.ts → MOTION.amount` (mar, palmeras, cielo).
 
+### Celulares
+
+- **Resolución por "presupuesto de pixeles"** (`QUALITY_PROFILES.pixelBudget`): un celular tiene pocos pixeles
+  CSS pero densidad 3×, así que renderiza a 2× y se ve nítido; una pantalla grande se queda en 1×. Mismo costo, misma calidad.
+- **Textura según lo que la foto ocupa de verdad**: en vertical la foto se ve muy ampliada → celulares con ≥4 GB
+  reciben la de 2560 px. Máscaras y zonas siempre en 1920 (ahorra memoria de GPU).
+- **Cámara que recorre el pueblo** en vertical (`config.ts → PORTRAIT`): la foto es horizontal, así que la vista se
+  desplaza lento de las casas al muelle y los locales, sin cortar nada importante.
+- Para probar un perfil: `?calidad=0`, `?calidad=1` o `?calidad=2` en la URL.
+
 ## Secciones
 
 - `src/sections/Idea.tsx` — **Parte 1**: qué es Bayahibe Verde y quiénes lo hacen posible.

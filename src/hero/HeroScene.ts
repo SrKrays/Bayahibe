@@ -36,7 +36,9 @@ import {
   LAPSE,
   MOTION,
   SKY,
+  PORTRAIT,
   QUALITY_PROFILES,
+  TEXTURE_SIZES,
   TEXTURES,
   TEXTURE_EXT,
   type Grade,
@@ -104,6 +106,9 @@ export class HeroScene {
   private suffix: string;
   private motion: number;
   private skyDrift = 0;
+  private panTime = 0;
+  /** pixeles de pantalla por pixel de imagen (para escalar las aves igual en cualquier pantalla) */
+  private coverScale = 1;
   private loaded = new Set<TexKey>();
   private destroyed = false;
   private visibilityObserver?: IntersectionObserver;
@@ -124,19 +129,16 @@ export class HeroScene {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const tier = detectQuality();
     const profile = QUALITY_PROFILES[tier];
-    // tamaño de texturas: 2560 (pantallas grandes, equipo alto) · 1920 · 1280 (flojo / celular)
-    const w = window.innerWidth * Math.min(window.devicePixelRatio || 1, 2);
-    const suffix =
-      profile.mobileTextures || window.innerWidth < MOTION.desktopMinWidth ? '-mobile' : tier === 2 && w > 2000 ? '' : '-md';
+    const { resolution, suffix } = pickRender(container, tier);
+    const avif = await supportsAvif();
 
-    const [avif] = await Promise.all([supportsAvif()]);
     const app = new Application();
     await app.init({
       resizeTo: container,
       preference: 'webgl', // el shader está en GLSL
       antialias: false, // quad a pantalla completa + aves en textura: no hace falta
       backgroundAlpha: 0,
-      resolution: Math.min(window.devicePixelRatio || 1, profile.resolution),
+      resolution,
       autoDensity: true,
       powerPreference: tier === 2 ? 'high-performance' : undefined,
     });
@@ -147,7 +149,10 @@ export class HeroScene {
     await scene.setup();
     container.appendChild(app.canvas);
     scene.observeVisibility(container);
-    if (import.meta.env.DEV) console.info(`[Hero] calidad ${tier} · texturas ${suffix || 'full'} · ${avif ? 'avif' : 'webp'}`, profile);
+    if (import.meta.env.DEV)
+      console.info(
+        `[Hero] calidad ${tier} · resolución ${resolution.toFixed(2)} · texturas ${suffix || 'full'} · ${avif ? 'avif' : 'webp'}`,
+      );
     return scene;
   }
 
@@ -155,7 +160,9 @@ export class HeroScene {
   private url(key: TexKey) {
     // las fotos tienen versión AVIF (mitad de peso, más calidad); datos (mask/zones) no
     const ext = this.avif && TEXTURE_EXT[key] === 'webp' && key !== 'mask' ? 'avif' : TEXTURE_EXT[key];
-    return `/textures/${TEXTURES[key]}${this.suffix}.${ext}`;
+    // máscaras y zonas son datos suaves: con 1920 alcanza (ahorra ~20 MB de memoria de GPU)
+    const suffix = (key === 'mask' || key === 'zones') && this.suffix === '' ? '-md' : this.suffix;
+    return `/textures/${TEXTURES[key]}${suffix}.${ext}`;
   }
 
   private async loadTextures(keys: TexKey[]) {
@@ -285,7 +292,8 @@ export class HeroScene {
     this.birdLayer.visible = alpha > 0.01;
     if (!this.birdLayer.visible) return;
     this.birdLayer.alpha = alpha;
-    const k = W / 1440;
+    // tamaño relativo a la foto (en vertical la foto se ve grande: las aves también)
+    const k = (this.coverScale * this.imageSize.w) / 1440;
     for (const b of this.birds) {
       b.x += b.speed * dt;
       if (b.x > 1.08) {
@@ -317,8 +325,16 @@ export class HeroScene {
     const sy = H / (this.imageSize.h * scale);
     u.uCover[0] = sx;
     u.uCover[1] = sy;
-    u.uCover[2] = (1 - sx) / 2;
+    // horizontal: centrado. Vertical (celular): la cámara recorre el pueblo despacio.
+    let focus = 0.5;
+    if (sx < 0.8) {
+      this.panTime += dt * this.motion;
+      const swing = Math.sin((this.panTime / PORTRAIT.panPeriod) * Math.PI * 2);
+      focus = PORTRAIT.focus + swing * PORTRAIT.pan;
+    }
+    u.uCover[2] = Math.min(1 - sx, Math.max(0, focus - sx / 2));
     u.uCover[3] = (1 - sy) / 2;
+    this.coverScale = scale;
     this.mesh.scale.set(W, H);
 
     // ================= TIME-LAPSES =================
@@ -435,4 +451,29 @@ export class HeroScene {
     this.birdFrames.forEach((t) => t.destroy(true));
     this.app.destroy(true, { children: true, texture: false });
   }
+}
+
+/**
+ * Elige resolución del canvas y tamaño de textura según lo que la foto
+ * REALMENTE ocupa en pantalla (en vertical se ve mucho más grande).
+ */
+function pickRender(container: HTMLElement, tier: QualityTier) {
+  const profile = QUALITY_PROFILES[tier];
+  const w = Math.max(1, container.clientWidth || window.innerWidth);
+  const h = Math.max(1, container.clientHeight || window.innerHeight);
+  const dpr = window.devicePixelRatio || 1;
+
+  // resolución: lo más nítida posible sin pasar el presupuesto de pixeles del perfil
+  const byBudget = Math.sqrt(profile.pixelBudget / (w * h));
+  const resolution = Math.max(0.6, Math.min(dpr, profile.maxDpr, byBudget));
+
+  // ancho con el que se dibuja la foto (cover 16:9) en pixeles reales
+  const imageAspect = 16 / 9;
+  const drawnWidth = Math.max(w, h * imageAspect) * resolution;
+  // celulares en vertical con memoria suficiente: la foto se ve MUY ampliada → textura grande
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
+  const maxTexture = tier >= 1 && h > w && memory >= 4 ? 2560 : profile.maxTexture;
+  const fit = TEXTURE_SIZES.find((t) => t.width >= drawnWidth * 0.9 && t.width <= maxTexture);
+  const capped = [...TEXTURE_SIZES].reverse().find((t) => t.width <= maxTexture)!;
+  return { resolution, suffix: (fit ?? capped).suffix };
 }

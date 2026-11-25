@@ -45,19 +45,42 @@ export const TIMING = {
 export const MOTION = {
   /** Intensidad de movimiento (1 = versión anterior · 1.5 = +50 %). */
   amount: { sea: 1.5, palms: 1.5, sky: 1.5 },
-  /** Ancho a partir del cual se usan texturas full (si no, las -mobile). */
-  desktopMinWidth: 900,
 };
 
 /**
- * Perfiles de calidad. Se elige uno al cargar según el equipo y, si igual
- * baja de ~45 fps, la escena reduce la resolución sola (ver HeroScene).
+ * Perfiles de calidad. La resolución del canvas NO es fija: se calcula con un
+ * "presupuesto de pixeles" → un celular (pantalla chica, densidad 3×) puede renderizar
+ * a 2× y verse nítido, mientras una pantalla 4K grande se queda en 1×.
+ * Si igual baja de ~45 fps, la escena reduce la resolución sola (ver HeroScene).
  */
 export const QUALITY_PROFILES = {
-  0: { resolution: 0.75, maxFPS: 30, birds: 3, mobileTextures: true }, // equipos flojos
-  1: { resolution: 1, maxFPS: 60, birds: 5, mobileTextures: false }, // medio / celulares
-  2: { resolution: 1.25, maxFPS: 60, birds: 7, mobileTextures: false }, // alto
+  // equipos flojos
+  0: { pixelBudget: 1.1e6, maxDpr: 1.5, maxFPS: 30, birds: 3, maxTexture: 1280 },
+  // medio / la mayoría de los celulares
+  1: { pixelBudget: 2.4e6, maxDpr: 2, maxFPS: 60, birds: 5, maxTexture: 1920 },
+  // alto
+  2: { pixelBudget: 3.8e6, maxDpr: 2, maxFPS: 60, birds: 7, maxTexture: 2560 },
 } as const;
+
+/** Texturas disponibles (ancho → sufijo). Deben coincidir con scripts/build-textures.mjs. */
+export const TEXTURE_SIZES = [
+  { width: 1280, suffix: '-mobile' },
+  { width: 1920, suffix: '-md' },
+  { width: 2560, suffix: '' },
+] as const;
+
+/**
+ * Pantallas verticales (celulares): la foto es horizontal y sólo entra una franja.
+ * La "cámara" recorre lentamente el pueblo de un lado al otro para mostrarlo entero.
+ */
+export const PORTRAIT = {
+  /** Centro del encuadre (0 = izquierda, 1 = derecha). El muelle está en ~0.55. */
+  focus: 0.55,
+  /** Cuánto recorre la cámara hacia cada lado (fracción del ancho de la foto). */
+  pan: 0.2,
+  /** Segundos de una ida y vuelta completa. */
+  panPeriod: 26,
+};
 
 export type QualityTier = keyof typeof QUALITY_PROFILES;
 

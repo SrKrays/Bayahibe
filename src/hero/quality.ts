@@ -5,6 +5,10 @@ import type { QualityTier } from './config';
  * núcleos, memoria, ahorro de datos, puntero táctil y la GPU real.
  */
 export function detectQuality(): QualityTier {
+  // para probar: agregá ?calidad=0, ?calidad=1 o ?calidad=2 a la URL
+  const forced = new URLSearchParams(window.location.search).get('calidad');
+  if (forced === '0' || forced === '1' || forced === '2') return Number(forced) as QualityTier;
+
   const nav = navigator as Navigator & {
     deviceMemory?: number;
     connection?: { saveData?: boolean };
