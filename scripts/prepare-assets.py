@@ -38,6 +38,13 @@ def small(img, w):
     return img.resize((w, round(img.height * w / img.width)), Image.LANCZOS)
 
 
+# Zonas a BORRAR de una capa (x0, y0, x1, y1 en fracción de la imagen).
+# La balanza de la estación de Guardianes no aporta al mensaje → se quita (pedido del cliente).
+ERASE = {
+    'props-station': [(0.9285, 0.6705, 0.972, 0.862), (0.886, 0.803, 0.972, 0.862)],
+}
+
+
 def layers(src_name, zones, prefix, base_hi, thr=55, min_area=40):
     """Recorta lo que cambió entre src y base. La detección se hace a 1x (más estable)
     y el color se toma de la versión escalada."""
@@ -59,6 +66,8 @@ def layers(src_name, zones, prefix, base_hi, thr=55, min_area=40):
     src_np = np.asarray(src_hi)
     for name, fn in zones.items():
         z = ndi.binary_dilation(keep & fn(X, Y), iterations=1)
+        for x0, y0, x1, y1 in ERASE.get(f'{prefix}-{name}', []):
+            z &= ~((X >= x0) & (X <= x1) & (Y >= y0) & (Y <= y1))
         alpha = Image.fromarray((z * 255).astype(np.uint8)).resize((W, H), Image.BILINEAR)
         alpha = alpha.filter(ImageFilter.GaussianBlur(1.2))
         Image.fromarray(np.dstack([src_np, np.asarray(alpha)]), 'RGBA').save(ROOT / f'{prefix}-{name}.png')

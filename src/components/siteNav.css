@@ -1,0 +1,110 @@
+.site-nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: clamp(14px, 2.2vw, 26px) clamp(16px, 4vw, 56px);
+  transition:
+    background 0.35s,
+    padding 0.35s,
+    box-shadow 0.35s;
+}
+/* sobre la foto: sombra suave arriba para que todo se lea */
+.site-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 -40px 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(3, 12, 14, 0.55), transparent);
+  pointer-events: none;
+  transition: opacity 0.35s;
+}
+.site-nav.is-solid {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: rgba(8, 20, 22, 0.94);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+.site-nav.is-solid::before {
+  opacity: 0;
+}
+
+/* ---------- logo: más grande y con más contraste ---------- */
+.site-nav__logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 2px 14px rgba(0, 0, 0, 0.45);
+}
+.site-nav__logo em {
+  font-style: normal;
+  color: #7ff0e8;
+}
+.site-nav__logo svg {
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+}
+
+/* ---------- links: pastilla oscura para que se lean sobre cualquier fondo ---------- */
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(6, 16, 18, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.site-nav__links a {
+  padding: 9px 16px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.site-nav__links a:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.site-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 1080px) {
+  .site-nav__links {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .site-nav__logo {
+    font-size: 14px;
+  }
+  .site-nav__logo svg {
+    width: 34px;
+    height: 34px;
+  }
+  .site-nav__actions {
+    gap: 8px;
+  }
+  .site-nav .donate-btn--nav span {
+    display: none; /* sólo el corazón */
+  }
+  .site-nav .donate-btn--nav {
+    padding: 11px;
+  }
+}

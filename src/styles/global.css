@@ -30,3 +30,8 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* la barra de arriba es fija: que los anclas (#idea, #programa…) no queden tapados */
+section[id] {
+  scroll-margin-top: 72px;
+}

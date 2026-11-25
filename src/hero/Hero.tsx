@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import type { HeroScene } from './HeroScene';
 import { TIMING } from './config';
+import { useLanguage } from '../i18n/LanguageContext';
 import './hero.css';
 
 type Act = 1 | 2 | 3 | 4;
@@ -23,6 +24,10 @@ const ACT_COPY: Record<Exclude<Act, 1>, { title: string; sub: string }> = {
 const INTRO_WORD = 'Bayahibe';
 
 export default function Hero() {
+  const { t, language } = useLanguage();
+  // la timeline vive fuera de React: lee siempre la traducción actual por esta ref
+  const tRef = useRef(t);
+  tRef.current = t;
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -67,11 +72,12 @@ export default function Hero() {
             const lapseEl = section.querySelector<HTMLElement>('.lapse');
             const labelEl = section.querySelector<HTMLElement>('.lapse__label');
             const setNum = (v: number | string) => {
-              if (counterRef.current) counterRef.current.textContent = String(v);
+              if (counterRef.current) counterRef.current.textContent = typeof v === 'string' ? tRef.current(v) : String(v);
             };
             const setCounter = (num: string, label: string, mode: string) => {
               setNum(num);
-              if (labelEl) labelEl.textContent = label;
+              if (labelEl) labelEl.textContent = tRef.current(label);
+              if (lapseEl) lapseEl.dataset.label = label; // para re-traducir si cambian el idioma a mitad
               if (lapseEl) lapseEl.dataset.mode = mode;
             };
 
@@ -236,6 +242,16 @@ export default function Hero() {
     };
   }, []);
 
+  // si cambian el idioma mientras corre un time-lapse, re-traducimos el contador
+  useEffect(() => {
+    const el = sectionRef.current?.querySelector<HTMLElement>('.lapse');
+    const label = el?.dataset.label;
+    const labelEl = el?.querySelector('.lapse__label');
+    if (label && labelEl) labelEl.textContent = t(label);
+    const num = counterRef.current;
+    if (num && /^(HOY|TODAY)$/.test(num.textContent ?? '')) num.textContent = t('HOY');
+  }, [language, t]);
+
   /** Salta a un acto desde los puntos. El acto 1 reinicia todo. */
   const goTo = (n: Act) => {
     const tl = tlRef.current;
@@ -246,32 +262,14 @@ export default function Hero() {
   };
 
   return (
-    <section ref={sectionRef} className="hero" aria-label="Bayahibe, antes y después">
+    <section ref={sectionRef} className="hero" aria-label={t('Bayahibe, antes y después')}>
       <div className={`hero__frame${webglFailed ? ' hero__frame--static' : ''}`}>
         <div ref={stageRef} className="hero__stage" aria-hidden="true" />
-
-        <header className="hero__nav">
-          <a href="#" className="hero__logo">
-            <LeafIcon />
-            <span>
-              BAYAHIBE
-              <br />
-              VERDE
-            </span>
-          </a>
-          <nav className="hero__links" aria-label="Secciones">
-            <a href="#idea">La idea</a>
-            <a href="#programa">Cómo lo hacemos</a>
-            <a href="#sumate" className="hero__links-cta">
-              Súmate
-            </a>
-          </nav>
-        </header>
 
         {/* ---------- Acto 1: introducción ---------- */}
         <div className="intro__shade" aria-hidden="true" />
         <div className="intro">
-          <p className="intro__eyebrow">La Altagracia · República Dominicana</p>
+          <p className="intro__eyebrow">La Altagracia · {t('República Dominicana')}</p>
           <h1 className="intro__title">
             <svg className="intro__word" viewBox="0 0 1000 320" role="img" aria-label={INTRO_WORD}>
               <defs>
@@ -310,9 +308,9 @@ export default function Hero() {
           </h1>
           <p className="intro__lead">
             <span className="intro__lead-line">
-              Mar turquesa, arrecifes, manglares y un pueblo que vive de su costa.
+              {t('Mar turquesa, arrecifes, manglares y un pueblo que vive de su costa.')}
             </span>
-            <span className="intro__lead-line">Un rincón del Caribe que vale la pena cuidar.</span>
+            <span className="intro__lead-line">{t('Un rincón del Caribe que vale la pena cuidar.')}</span>
           </p>
         </div>
 
@@ -323,15 +321,15 @@ export default function Hero() {
             className={`hero__copy hero__copy--${n}${act === n && !rewinding ? ' is-active' : ''}`}
             aria-hidden={act !== n}
           >
-            <h2 className="hero__title">{ACT_COPY[n].title}</h2>
-            <p className="hero__sub">{ACT_COPY[n].sub}</p>
+            <h2 className="hero__title">{t(ACT_COPY[n].title)}</h2>
+            <p className="hero__sub">{t(ACT_COPY[n].sub)}</p>
             {n === 4 && (
               <div className="hero__ctas">
                 <a className="btn btn--solid" href="#sumate">
-                  Súmate
+                  {t('Súmate')}
                 </a>
                 <a className="btn btn--ghost" href="#idea">
-                  Conoce el programa
+                  {t('Conoce el programa')}
                 </a>
               </div>
             )}
@@ -347,7 +345,7 @@ export default function Hero() {
           <span className="lapse__icon" aria-hidden="true">
             ⏪
           </span>
-          <span className="lapse__label">días sin cuidarlo</span>
+          <span className="lapse__label">{t('días sin cuidarlo')}</span>
         </div>
 
         <div className="hero__dots">
@@ -356,7 +354,7 @@ export default function Hero() {
               key={n}
               className={act === n ? 'is-active' : ''}
               onClick={() => goTo(n)}
-              aria-label={n === 1 ? 'Ver desde el principio' : `Ir al acto ${n}`}
+              aria-label={n === 1 ? t('Ver desde el principio') : `${t('Ir al acto')} ${n}`}
             />
           ))}
           <div className="hero__progress-track">
@@ -365,24 +363,9 @@ export default function Hero() {
         </div>
 
         <a href="#idea" className={`hero__scroll-hint${finished ? ' is-visible' : ''}`}>
-          Descubre el proyecto <span aria-hidden="true">↓</span>
+          {t('Descubre el proyecto')} <span aria-hidden="true">↓</span>
         </a>
       </div>
     </section>
-  );
-}
-
-function LeafIcon() {
-  return (
-    <svg viewBox="0 0 32 32" width="34" height="34" fill="none" aria-hidden="true">
-      <circle cx="16" cy="16" r="15" fill="rgba(255,255,255,.14)" />
-      <path
-        d="M22.5 8.5c-7 .3-12 4.3-12 10.4 0 1.5.4 2.8 1.1 3.8M22.5 8.5c.4 7.6-3.7 13.4-9.8 13.4-.9 0-1.6-.1-2.3-.4M22.5 8.5 11.6 22.7"
-        stroke="#fff"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

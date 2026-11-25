@@ -1,0 +1,245 @@
+/* ---------- botón Colaborar ---------- */
+.donate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #ff8a5c, #f2545b);
+  box-shadow: 0 8px 22px rgba(242, 84, 91, 0.45);
+  transition:
+    transform 0.25s var(--ease),
+    box-shadow 0.25s;
+}
+.donate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(242, 84, 91, 0.55);
+}
+.donate-btn svg {
+  animation: beat 1.6s ease-in-out infinite;
+}
+@keyframes beat {
+  0%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.22);
+  }
+}
+.donate-btn--nav {
+  padding: 10px 18px;
+  font-size: 14px;
+}
+.donate-btn--large {
+  padding: 16px 28px;
+  font-size: 17px;
+}
+.donate-btn--floating {
+  position: fixed;
+  right: clamp(14px, 2.5vw, 28px);
+  bottom: clamp(14px, 2.5vw, 28px);
+  z-index: 40;
+  padding: 14px 22px;
+  font-size: 15px;
+}
+
+/* ---------- modal ---------- */
+.donate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(3, 10, 12, 0.72);
+  animation: fade 0.25s ease both;
+}
+.donate-modal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  padding: clamp(24px, 4vw, 40px);
+  border-radius: 24px;
+  background: #fffdf8;
+  color: var(--ink);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  outline: none;
+  animation: pop 0.35s cubic-bezier(0.2, 0.9, 0.2, 1.1) both;
+}
+.donate-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(11, 20, 22, 0.07);
+  font-size: 22px;
+  cursor: pointer;
+}
+.donate-modal__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, #ff8a5c, #f2545b);
+}
+.donate-modal__icon svg {
+  width: 26px;
+  height: 26px;
+}
+.donate-modal h2 {
+  margin: 16px 0 8px;
+  font-size: clamp(24px, 3vw, 30px);
+  letter-spacing: -0.02em;
+}
+.donate-modal__head > p {
+  margin: 0;
+  line-height: 1.55;
+  opacity: 0.75;
+}
+.donate-uses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.donate-uses li {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(31, 181, 176, 0.12);
+  color: #0e7f7b;
+  font-size: 13px;
+  font-weight: 700;
+}
+.donate-method {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(11, 20, 22, 0.1);
+}
+.donate-method h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+.donate-method h3 small {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.6;
+}
+.donate-method dl {
+  margin: 0;
+}
+.donate-field {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px dashed rgba(11, 20, 22, 0.1);
+}
+.donate-field:first-child {
+  border-top: 0;
+}
+.donate-field dt {
+  font-size: 13px;
+  opacity: 0.65;
+}
+.donate-field dd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-weight: 700;
+  word-break: break-all;
+}
+.donate-field dd button {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.donate-field.is-missing dd span {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #fff1b8;
+  color: #8a6400;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+.donate-contact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+.donate-contact p {
+  flex-basis: 100%;
+  margin: 0;
+  font-weight: 600;
+}
+.btn--ghost-dark {
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+.donate-thanks {
+  margin: 22px 0 0;
+  text-align: center;
+  font-weight: 700;
+  color: #0e7f7b;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+@media (max-width: 520px) {
+  .donate-field {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .donate-btn--floating span {
+    display: none; /* en celular: sólo el corazón */
+  }
+  .donate-btn--floating {
+    padding: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .donate-btn svg,
+  .donate-overlay,
+  .donate-modal {
+    animation: none;
+  }
+}

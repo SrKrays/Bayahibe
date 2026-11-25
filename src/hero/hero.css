@@ -36,60 +36,6 @@
   display: block;
 }
 
-/* ---------- Navegación ---------- */
-.hero__nav {
-  position: absolute;
-  inset: 0 0 auto 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: clamp(16px, 3vw, 36px) clamp(16px, 4vw, 56px);
-  z-index: 3;
-}
-
-.hero__logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #fff;
-  font-weight: 800;
-  font-size: 15px;
-  line-height: 1.05;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
-}
-
-.hero__links {
-  display: flex;
-  align-items: center;
-  gap: clamp(14px, 2.4vw, 32px);
-}
-.hero__links a {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
-  opacity: 0.92;
-}
-.hero__links a:hover {
-  opacity: 1;
-}
-.hero__links .hero__links-cta {
-  padding: 9px 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: rgba(10, 20, 22, 0.35);
-  text-shadow: none;
-}
-@media (max-width: 720px) {
-  .hero__links a:not(.hero__links-cta) {
-    display: none;
-  }
-}
-
 /* ---------- Intro (Acto 1) ---------- */
 /* sombra sólo detrás del bloque de texto: el fondo sigue luciendo, la letra se lee */
 .intro__shade {

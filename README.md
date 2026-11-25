@@ -103,11 +103,27 @@ Intensidad de movimiento: `config.ts → MOTION.amount` (mar, palmeras, cielo).
   desplaza lento de las casas al muelle y los locales, sin cortar nada importante.
 - Para probar un perfil: `?calidad=0`, `?calidad=1` o `?calidad=2` en la URL.
 
+## v0.2 · Cambios pedidos por el cliente
+
+- **Colaborar**: botón en la barra (siempre visible) y en "Súmate" → modal con los datos para donar y botón copiar.
+  ⚠️ Los datos se completan en `src/config/donations.ts` (hoy dicen "A COMPLETAR").
+- **Traducción ES / EN** de toda la web (misma lógica que JMO: el texto en español es la clave, el inglés vive en
+  `src/i18n/translations.ts`). Selector en la barra + aviso "Read in English" con flecha la primera vez.
+- **El objetivo** (nueva sección 01): el ciclo Aprender → Actuar → Medir → Contagiar, el resultado y las metas del año.
+- **Chips clickeables** en "Paso a paso": cada tema abre una explicación corta y didáctica.
+- **Pasaporte Verde**: qué es, cómo se gana (misión semanal → sello → pasaporte completo del mes = voucher).
+- **Puntos de depósito para reciclaje** en "¿Quiénes lo hacen posible?".
+- Barra superior fija, logo y subtítulos de sección más grandes y legibles; "Poco a poco" → "Paso a paso".
+- Sin balanza en la estación de Guardianes (`scripts/prepare-assets.py → ERASE`).
+
 ## Secciones
 
-- `src/sections/Idea.tsx` — **Parte 1**: qué es Bayahibe Verde y quiénes lo hacen posible.
-- `src/sections/Process.tsx` — **Parte 2**: cómo se cambia poco a poco (5 etapas + protocolo de seguridad).
-- `src/sections/Join.tsx` — Súmate (el formulario real llega con el backend .NET).
+- `src/sections/Goal.tsx` — **01 El objetivo**: cómo se logra, de un vistazo.
+- `src/sections/Idea.tsx` — **02 La idea**: qué es Bayahibe Verde y quiénes lo hacen posible.
+- `src/sections/Process.tsx` — **03 Paso a paso**: 5 etapas con chips clickeables + Pasaporte Verde + seguridad.
+- `src/sections/Passport.tsx` — Pasaporte Verde.
+- `src/sections/Join.tsx` — Súmate + Colaborar (el formulario real llega con el backend .NET).
+- `src/components/` — barra superior, selector de idioma, Colaborar (modal).
 
 ## Pipeline de imágenes
 
