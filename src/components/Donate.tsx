@@ -33,7 +33,7 @@ export function DonateButton({ variant = 'nav' }: { variant?: 'nav' | 'floating'
   );
 }
 
-const USES = ['Guantes y pinzas', 'Bolsas diferenciadas', 'Chalecos y botiquín', 'Material para las escuelas'];
+const USES = ['Guantes y pinzas', 'Bolsas diferenciadas', 'Chalecos y botiquín', 'Indumentaria para los guardianes'];
 
 function DonateModal({ onClose }: { onClose: () => void }) {
   const { t } = useLanguage();
@@ -88,7 +88,7 @@ function DonateModal({ onClose }: { onClose: () => void }) {
           <span className="donate-modal__icon">
             <HeartIcon />
           </span>
-          <h2 id="donate-title">{t('Colabora con Bayahibe Verde')}</h2>
+          <h2 id="donate-title">{t('Colabora con Mi casa, mi mar')}</h2>
           <p>
             {t(
               'Cada aporte se convierte en materiales para las brigadas escolares y se informa públicamente en qué se usó.',

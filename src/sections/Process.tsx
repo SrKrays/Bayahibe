@@ -123,7 +123,7 @@ const STEPS: Step[] = [
   {
     when: 'Cada mes',
     title: 'Toda la comunidad',
-    text: 'Hoteles, restaurantes, comercios y operadores turísticos se suman al cuidado del destino. Una vez al mes, la Gran Jornada Bayahibe Verde reúne a todos.',
+    text: 'Hoteles, restaurantes, comercios y operadores turísticos se suman al cuidado del destino. Una vez al mes, la Gran Jornada “Mi casa, mi mar” reúne a todos.',
     chips: [
       {
         label: 'Hoteles',

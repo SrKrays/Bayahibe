@@ -44,7 +44,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
     document.title =
-      language === 'en' ? 'Bayahibe Verde · Guardians of Bayahibe' : 'Bayahibe Verde · Guardianes de Bayahibe';
+      language === 'en' ? 'Mi casa, mi mar · Guardians of Bayahibe' : 'Mi casa, mi mar · Guardianes de Bayahibe';
   }, [language]);
 
   const t = useCallback(

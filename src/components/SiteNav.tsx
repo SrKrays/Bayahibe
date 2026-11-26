@@ -21,12 +21,12 @@ export default function SiteNav() {
 
   return (
     <header className={`site-nav${solid ? ' is-solid' : ''}`}>
-      <a href="#" className="site-nav__logo" aria-label="Bayahibe Verde">
+      <a href="#" className="site-nav__logo" aria-label="Mi casa, mi mar">
         <LeafIcon />
         <span>
-          BAYAHIBE
+          MI CASA
           <br />
-          <em>VERDE</em>
+          <em>MI MAR</em>
         </span>
       </a>
       <nav className="site-nav__links" aria-label={t('Secciones')}>

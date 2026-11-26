@@ -14,7 +14,8 @@
  *
  * Carga escalonada:
  *   1. create()      → base + mask + zones   (lo justo para el Acto 1)
- *   2. loadRest()    → trash, alt, props     (mientras se lee la intro)
+ *   2. loadRest()    → trash, alt, props, people (mientras se lee la intro;
+ *                      people es opcional: si no existe, la limpieza se ve sin gente)
  */
 import {
   Application,
@@ -54,8 +55,14 @@ export interface SceneState {
   lapse: number;
   /** Time-lapse de años: 0 = 2026 · 1 = 2036 */
   decade: number;
-  /** Rebobinado: 0 = 2036 · 1 = de vuelta a hoy, limpio */
+  /** Rebobinado de años: 0 = 2036 · 1 = de vuelta a hoy (todavía sucio) */
   rewind: number;
+  /** Aparición de la gente limpiando (0..1) */
+  people: number;
+  /** Limpieza: 0 = toda la basura · 1 = levantada (desaparece por tandas) */
+  cleanup: number;
+  /** Destello del "¡pum!" antes de que aparezca el Bayahibe recuperado (0..1) */
+  flash: number;
   /** Acto 4: tono de atardecer + props */
   toHope: number;
   propsMangroves: number;
@@ -89,6 +96,9 @@ export class HeroScene {
     lapse: 0,
     decade: 0,
     rewind: 0,
+    people: 0,
+    cleanup: 0,
+    flash: 0,
     toHope: 0,
     propsMangroves: 0,
     propsBins: 0,
@@ -194,12 +204,17 @@ export class HeroScene {
       zones: 'uZones',
       trash: 'uTrash',
       props: 'uProps',
+      people: 'uPeople',
     }[key];
     this.shader.resources[uniformName] = source;
   }
 
   /** Basura, 2036 y props. Llamar apenas arranca (bajan mientras se lee la intro). */
   loadRest() {
+    // la capa de gente es opcional: si todavía no está generada, no rompe nada
+    this.loadTextures(['people']).catch(() => {
+      if (import.meta.env.DEV) console.info('[Hero] sin capa de gente (people): la limpieza se ve sin personas');
+    });
     return this.loadTextures(['trash', 'alt', 'props']);
   }
 
@@ -224,6 +239,7 @@ export class HeroScene {
         uZones: empty,
         uTrash: empty,
         uProps: empty,
+        uPeople: empty,
         sceneUniforms: {
           uTime: { value: 0, type: 'f32' },
           uAmp: { value: new Float32Array([amount.sea, amount.palms, amount.sky]), type: 'vec3<f32>' },
@@ -233,6 +249,8 @@ export class HeroScene {
           uTrashAmount: { value: 0, type: 'f32' },
           uNight: { value: 0, type: 'f32' },
           uRewind: { value: 0, type: 'f32' },
+          uPeopleAmount: { value: 0, type: 'f32' },
+          uFlash: { value: 0, type: 'f32' },
           uPropsReveal: { value: new Float32Array(4), type: 'vec4<f32>' },
           uAltMix: { value: 0, type: 'f32' },
           uSun: { value: 1, type: 'f32' },
@@ -346,12 +364,15 @@ export class HeroScene {
     const steps = (v: number, n: number) => Math.min(1, Math.floor(v * n + 0.5) / n);
     const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
-    // rebobinado: primero deshace los años, después los días
-    const rYears = clamp01(s.rewind / L.rewindYears);
-    const rDays = clamp01((s.rewind - L.rewindYears) / (1 - L.rewindYears));
+    // rebobinado: deshace los años (2036 → hoy). La basura de hoy la levanta la gente.
+    const rYears = clamp01(s.rewind);
 
     // tiempo de escena: se acelera en los time-lapses y va HACIA ATRÁS al rebobinar
-    const warp = 1 + L.timeWarp * (bell(s.lapse) + bell(s.decade)) - (1 + L.timeWarp) * 1.4 * bell(s.rewind);
+    const warp =
+      1 +
+      L.timeWarp * (bell(s.lapse) + bell(s.decade)) -
+      (1 + L.timeWarp) * 1.4 * bell(s.rewind) +
+      L.cleanupWarp * bell(s.cleanup); // la limpieza va "en cámara rápida
     u.uTime += dt * this.motion * warp;
     // cielo: deriva continua + cada corrida da UNA vuelta entera (2 anchos = un ciclo del
     // espejo) → al terminar, las nubes están donde estaban. Al rebobinar, la vuelta es hacia atrás.
@@ -363,7 +384,6 @@ export class HeroScene {
     if (running(s.lapse)) night = pulse(s.lapse * L.days, L.nightDepth);
     else if (running(s.decade)) night = pulse(s.decade * L.years, L.yearDepth);
     else if (rYears > 0 && rYears < 1) night = pulse(rYears * L.years, L.yearDepth);
-    else if (rDays > 0 && rDays < 1) night = pulse(rDays * L.days, L.nightDepth);
     u.uNight = night;
 
     // 2036: sube por escalones con los años, baja por escalones al rebobinar
@@ -374,11 +394,15 @@ export class HeroScene {
     // basura: aparece por tandas (días) y desaparece por tandas al rebobinar
     const hasTrash = this.loaded.has('trash') ? 1 : 0;
     const trashIn = s.lapse >= 1 ? 1 : steps(s.lapse, L.days);
-    const trashOut = rDays > 0 ? 1 - steps(rDays, L.days) : 1;
+    const trashOut = s.cleanup > 0 ? 1 - steps(s.cleanup, L.cleanupSteps) : 1;
     u.uTrashAmount = hasTrash * trashIn * trashOut;
 
     // efecto "cinta rebobinando"
     u.uRewind = bell(s.rewind);
+
+    // gente limpiando + destello final
+    u.uPeopleAmount = this.loaded.has('people') ? s.people : 0;
+    u.uFlash = s.flash;
 
     // ---- color: 1 → 2 (días) → 3 (años) → vuelta atrás → 4 (atardecer)
     const dirty = s.intro * trashOut;

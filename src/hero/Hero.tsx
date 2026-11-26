@@ -72,7 +72,8 @@ export default function Hero() {
             const lapseEl = section.querySelector<HTMLElement>('.lapse');
             const labelEl = section.querySelector<HTMLElement>('.lapse__label');
             const setNum = (v: number | string) => {
-              if (counterRef.current) counterRef.current.textContent = typeof v === 'string' ? tRef.current(v) : String(v);
+              if (counterRef.current)
+                counterRef.current.textContent = typeof v === 'string' ? tRef.current(v) : String(v);
             };
             const setCounter = (num: string, label: string, mode: string) => {
               setNum(num);
@@ -182,9 +183,10 @@ export default function Hero() {
               .addLabel('act3', `to3+=${TIMING.decade * 0.85}`)
               .to({}, { duration: TIMING.readHold })
 
-              // ================= 3 → 4 · REBOBINAR =================
-              // la cinta vuelve atrás: 2036 → 2026 → hoy. Todo se deshace y, sobre el
-              // Bayahibe limpio, aparece el programa (tachos, cartel, manglares).
+              // ================= 3 → 4 · REBOBINAR + LIMPIAR + ¡PUM! =================
+              // 1) la cinta vuelve atrás: 2036 → hoy (Bayahibe sucio, como en el Acto 2)
+              // 2) aparece la gente y levanta la basura por tandas ("manos a la obra")
+              // 3) destello y, ¡pum!, el Bayahibe recuperado con el programa funcionando
               .addLabel('to4')
               .call(() => setCounter('2036', 'rebobinando', 'rewind'))
               .fromTo('.lapse', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.3 }, 'to4')
@@ -195,21 +197,30 @@ export default function Hero() {
                   rewind: 1,
                   duration: TIMING.rewind,
                   ease: 'power1.inOut',
-                  onUpdate: () => {
-                    const r = st.rewind;
-                    if (r < 0.7) setNum(2036 - Math.min(10, Math.floor((r / 0.7) * 10 + 0.5)));
-                    else setNum('HOY');
-                  },
+                  onUpdate: () => setNum(2036 - Math.min(10, Math.floor(st.rewind * 10 + 0.5))),
                 },
                 'to4',
               )
-              .call(() => setCounter('HOY', 'todavía estamos a tiempo', 'now'))
-              .to(st, { toHope: 1, duration: T, ease: 'power2.inOut' })
-              .to(st, { propsMangroves: 1, duration: T * 0.7, ease: 'power1.out' }, `<${T * 0.2}`)
-              .to(st, { propsBins: 1, duration: T * 0.7, ease: 'power1.out' }, `<${TIMING.layerStagger}`)
-              .to(st, { propsStation: 1, duration: T * 0.7, ease: 'power1.out' }, `<${TIMING.layerStagger}`)
-              .to('.lapse', { autoAlpha: 0, duration: 0.6 }, '>+0.3')
-              .addLabel('act4', `to4+=${TIMING.rewind + T * 0.5}`);
+              // --- limpieza ---
+              .addLabel('clean')
+              .call(() => setCounter('HOY', 'manos a la obra', 'clean'))
+              .fromTo(st, { people: 0 }, { people: 1, duration: 0.7, ease: 'power2.out' }, 'clean')
+              .fromTo(st, { cleanup: 0 }, { cleanup: 1, duration: TIMING.cleanup, ease: 'none' }, 'clean+=0.4')
+              // --- ¡pum! ---
+              .addLabel('boom')
+              .to(st, { flash: 1, duration: 0.22, ease: 'power2.in' }, 'boom')
+              .set(st, { people: 0, toHope: 1 }, 'boom+=0.22') // el cambio ocurre tapado por el destello
+              .call(() => setCounter('HOY', 'todavía estamos a tiempo', 'now'), [], 'boom+=0.22')
+              .to(st, { flash: 0, duration: 0.9, ease: 'power2.out' }, 'boom+=0.24')
+              .to(st, { propsMangroves: 1, duration: T * 0.6, ease: 'power1.out' }, 'boom+=0.35')
+              .to(st, { propsBins: 1, duration: T * 0.6, ease: 'power1.out' }, `boom+=${0.35 + TIMING.layerStagger}`)
+              .to(
+                st,
+                { propsStation: 1, duration: T * 0.6, ease: 'power1.out' },
+                `boom+=${0.35 + TIMING.layerStagger * 2}`,
+              )
+              .to('.lapse', { autoAlpha: 0, duration: 0.6 }, '>+0.6')
+              .addLabel('act4', 'boom+=0.5');
 
             // qué texto mostrar según dónde está la timeline (funciona también al saltar)
             const labels = tl.labels;

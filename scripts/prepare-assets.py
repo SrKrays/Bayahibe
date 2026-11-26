@@ -14,6 +14,8 @@ Salida en assets-src/:
   trash-left|right|shore|sea.png      recortes por diferencia contra la base
   props-mangroves|bins|station.png
   sky-plate.png                       cielo "sin palmeras" para el cielo infinito
+  people.png                          gente limpiando (si existe sources/src-people.png:
+                                      la escena SUCIA con gente juntando basura)
   (las máscaras mask-*.png NO se tocan si ya existen: pueden estar hechas a mano)
 
 Uso:  python scripts/prepare-assets.py          (pip install numpy pillow scipy)
@@ -38,6 +40,18 @@ def small(img, w):
     return img.resize((w, round(img.height * w / img.width)), Image.LANCZOS)
 
 
+# Recuadros (x0, y0, x1, y1 en fracción) donde están las personas de src-people.png.
+# Fuera de estos recuadros no se recorta nada: evita el "ruido" de plantas/vereda que la IA retoca.
+PEOPLE_BOXES = [
+    (0.093, 0.735, 0.185, 0.905),  # vereda izq: agachado adelante
+    (0.168, 0.605, 0.236, 0.828),  # vereda izq: de pie con bolsa
+    (0.288, 0.628, 0.348, 0.752),  # vereda izq: agachado al fondo
+    (0.470, 0.512, 0.532, 0.612),  # orilla: pareja
+    (0.664, 0.618, 0.748, 0.832),  # vereda der: con pinza
+    (0.740, 0.605, 0.843, 0.857),  # vereda der: bolsa + adulto
+    (0.840, 0.730, 0.918, 0.880),  # vereda der: agachada
+]
+
 # Zonas a BORRAR de una capa (x0, y0, x1, y1 en fracción de la imagen).
 # La balanza de la estación de Guardianes no aporta al mensaje → se quita (pedido del cliente).
 ERASE = {
@@ -45,7 +59,7 @@ ERASE = {
 }
 
 
-def layers(src_name, zones, prefix, base_hi, thr=55, min_area=40):
+def layers(src_name, zones, prefix, base_hi, thr=55, min_area=40, out_name=None):
     """Recorta lo que cambió entre src y base. La detección se hace a 1x (más estable)
     y el color se toma de la versión escalada."""
     src_hi = load(src_name)
@@ -70,8 +84,66 @@ def layers(src_name, zones, prefix, base_hi, thr=55, min_area=40):
             z &= ~((X >= x0) & (X <= x1) & (Y >= y0) & (Y <= y1))
         alpha = Image.fromarray((z * 255).astype(np.uint8)).resize((W, H), Image.BILINEAR)
         alpha = alpha.filter(ImageFilter.GaussianBlur(1.2))
-        Image.fromarray(np.dstack([src_np, np.asarray(alpha)]), 'RGBA').save(ROOT / f'{prefix}-{name}.png')
-        print(f'  ✓ {prefix}-{name}.png')
+        fname = out_name or f'{prefix}-{name}.png'
+        Image.fromarray(np.dstack([src_np, np.asarray(alpha)]), 'RGBA').save(ROOT / fname)
+        print(f'  ✓ {fname}')
+
+
+def person_masks(img_small):
+    """Máscara de personas con Mask R-CNN (necesita torch + torchvision; ver scripts/upscale.py).
+    Devuelve None si no están instalados → se usa sólo la diferencia por recuadros."""
+    try:
+        import torch, torchvision
+        from torchvision.models.detection import maskrcnn_resnet50_fpn_v2, MaskRCNN_ResNet50_FPN_V2_Weights
+    except ImportError:
+        return None
+    w = MaskRCNN_ResNet50_FPN_V2_Weights.DEFAULT
+    model = maskrcnn_resnet50_fpn_v2(weights=w).eval()
+    with torch.no_grad():
+        r = model([torchvision.transforms.functional.to_tensor(img_small)])[0]
+    m = np.zeros(img_small.size[::-1], np.float32)
+    for lab, score, mk in zip(r['labels'], r['scores'], r['masks']):
+        if score > 0.5 and w.meta['categories'][lab] in ('person', 'handbag', 'backpack'):
+            m = np.maximum(m, mk[0].numpy())
+    return m > 0.5
+
+
+def people_layer(base_hi, thr=60):
+    src_hi = load('src-people.png')
+    W, H = base_hi.size
+    lw = W // 2
+    src_small = small(src_hi, lw)
+    a = np.asarray(small(base_hi, lw)).astype(np.float32)
+    b = np.asarray(src_small).astype(np.float32)
+    h = a.shape[0]
+    diff = np.abs(b - a).sum(-1) > thr
+    persons = person_masks(src_small)
+    mask = np.zeros((h, lw), bool)
+    for x0, y0, x1, y1 in PEOPLE_BOXES:
+        X0, Y0, X1, Y1 = int(x0 * lw), int(y0 * h), int(x1 * lw), int(y1 * h)
+        d = ndi.binary_fill_holes(ndi.binary_closing(diff[Y0:Y1, X0:X1], iterations=2))
+        if persons is not None and persons[Y0:Y1, X0:X1].any():
+            p = persons[Y0:Y1, X0:X1]
+            # bolsas negras: pixeles oscuros que cambiaron, pegados a la persona
+            lum = b[Y0:Y1, X0:X1].mean(-1)
+            bag = d & (lum < 75) & ndi.binary_dilation(p, iterations=22)
+            bag = ndi.binary_opening(bag, iterations=1)
+            lab, n = ndi.label(bag)
+            if n:
+                sizes = ndi.sum(bag, lab, range(1, n + 1))
+                bag = np.isin(lab, 1 + np.where(sizes >= 80)[0])
+            bag = ndi.binary_fill_holes(ndi.binary_closing(bag, iterations=2))
+            mask[Y0:Y1, X0:X1] |= p | bag
+        else:
+            lab, n = ndi.label(ndi.binary_opening(d, iterations=1))
+            if n:
+                sizes = ndi.sum(d, lab, range(1, n + 1))
+                mask[Y0:Y1, X0:X1] |= lab == (1 + int(np.argmax(sizes)))
+    mask = ndi.binary_fill_holes(ndi.binary_closing(mask, iterations=1))
+    alpha = Image.fromarray((mask * 255).astype(np.uint8)).resize((W, H), Image.BILINEAR)
+    alpha = alpha.filter(ImageFilter.GaussianBlur(1.2))
+    Image.fromarray(np.dstack([np.asarray(src_hi), np.asarray(alpha)]), 'RGBA').save(ROOT / 'people.png')
+    print('  ✓ people.png' + ('' if persons is not None else ' (sin Mask R-CNN: recorte aproximado)'))
 
 
 def sky_plate(base_hi):
@@ -141,4 +213,12 @@ if __name__ == '__main__':
     }, 'props', base_hi)
 
     sky_plate(base_hi)
+
+    # Gente limpiando: sólo dentro de los recuadros de cada persona, comparando contra la
+    # escena limpia, y quedándose con la figura principal de cada recuadro.
+    if (SRC / 'src-people.png').exists():
+        people_layer(base_hi)
+    else:
+        print('  · sin sources/src-people.png: se omite la capa de gente')
+
     print('Listo. Ahora: npm run assets')

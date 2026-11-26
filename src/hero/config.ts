@@ -33,7 +33,9 @@ export const TIMING = {
   /** Duración del time-lapse 2 → 3 (10 "años": 2026 → 2036). */
   decade: 2.6,
   /** Duración del rebobinado 3 → 4 (2036 → hoy). */
-  rewind: 2.6,
+  rewind: 2.2,
+  /** Duración de la limpieza: la gente levanta la basura (3 → 4). */
+  cleanup: 3.2,
   /** Duración de cada transición entre actos (pedido: 1–2 s). */
   transition: 1.8,
   /** Tiempo de lectura en los actos 2 y 3 antes de pasar al siguiente. */
@@ -99,8 +101,10 @@ export const LAPSE = {
   yearDepth: 0.45,
   /** Cuánto se acelera el tiempo (nubes, mar, aves) en el pico del time-lapse. */
   timeWarp: 22,
-  /** Rebobinado: qué parte deshace los años (el resto deshace los días). */
-  rewindYears: 0.65,
+  /** Limpieza (Acto 3 → 4): en cuántas tandas la gente levanta la basura. */
+  cleanupSteps: 8,
+  /** La limpieza va un poco acelerada (nubes y mar más rápidos). */
+  cleanupWarp: 3,
 };
 
 /** Debe coincidir con scripts/build-textures.mjs (lo calcula al generar sky.webp). */
@@ -119,6 +123,7 @@ export const TEXTURES = {
   zones: 'zones',
   trash: 'trash',
   props: 'props',
+  people: 'people',
 } as const;
 
 export const TEXTURE_EXT: Record<keyof typeof TEXTURES, string> = {
@@ -129,4 +134,5 @@ export const TEXTURE_EXT: Record<keyof typeof TEXTURES, string> = {
   zones: 'png',
   trash: 'webp',
   props: 'webp',
+  people: 'webp',
 };

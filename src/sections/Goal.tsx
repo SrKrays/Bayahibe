@@ -12,7 +12,7 @@ const STEPS = [
   { key: 'learn', title: 'Aprender', text: 'Las escuelas enseñan a separar, reducir y cuidar el mar.' },
   { key: 'act', title: 'Actuar', text: 'Una jornada de limpieza por semana, rotando entre escuelas.' },
   { key: 'measure', title: 'Medir', text: 'Cada kilo se pesa y se publica: el avance se ve.' },
-  { key: 'spread', title: 'Contagiar', text: 'Los niños llevan la misión a casa y las familias ganan premios.' },
+  { key: 'spread', title: 'Concientizar', text: 'Los niños llevan la misión a casa y las familias ganan premios.' },
 ] as const;
 
 const GOALS = [

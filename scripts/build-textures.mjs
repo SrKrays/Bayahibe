@@ -181,6 +181,12 @@ async function build({ suffix, width, quality }) {
   const props = await packLayers(PROPS_LAYERS, width, height);
   await photo(sharp(trash.color, { raw: { width, height, channels: 4 } }).png(), 'trash', { alpha: true });
   await photo(sharp(props.color, { raw: { width, height, channels: 4 } }).png(), 'props', { alpha: true });
+
+  // Gente limpiando (opcional): capa propia, sólo si existe assets-src/people.png
+  if (existsSync(src('people'))) {
+    await photo(sharp(src('people')).resize(width, height, { fit: 'fill' }).png(), 'people', { alpha: true });
+    console.log('  ✓ people');
+  }
   console.log('  ✓ trash / props');
 
   // 4. Zonas + "día" de cada objeto de basura (PNG sin pérdida: son datos, no foto)

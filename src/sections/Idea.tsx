@@ -1,6 +1,6 @@
 /**
  * PARTE 1 · La idea y quiénes la llevan adelante.
- * Textos basados en el documento del programa "Bayahibe Verde".
+ * Textos basados en el documento del programa "Mi casa, mi mar".
  */
 import { useRef } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -61,7 +61,7 @@ export default function Idea() {
         <div className="idea__grid">
           <div className="idea__text" data-reveal-group>
             <p className="lead">
-              <strong>Bayahibe Verde</strong>{' '}
+              <strong>Mi casa, mi mar</strong>{' '}
               {t(
                 'es un programa escolar permanente de educación ambiental, reciclaje y protección del entorno para el Distrito Municipal de Bayahibe, en La Altagracia.',
               )}

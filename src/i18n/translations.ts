@@ -33,6 +33,7 @@ export const EN: Record<string, string> = {
   'si nada cambia': 'if nothing changes',
   rebobinando: 'rewinding',
   'todavía estamos a tiempo': 'there’s still time',
+  'manos a la obra': 'let’s get to work',
   HOY: 'TODAY',
 
   // ---------- 01 · el objetivo ----------
@@ -43,7 +44,7 @@ export const EN: Record<string, string> = {
   Aprender: 'Learn',
   Actuar: 'Act',
   Medir: 'Measure',
-  Contagiar: 'Spread it',
+  Concientizar: 'Raise awareness',
   'Las escuelas enseñan a separar, reducir y cuidar el mar.': 'Schools teach how to sort, reduce and protect the sea.',
   'Una jornada de limpieza por semana, rotando entre escuelas.': 'One clean-up day a week, rotating between schools.',
   'Cada kilo se pesa y se publica: el avance se ve.': 'Every kilo is weighed and published: progress you can see.',
@@ -178,8 +179,8 @@ export const EN: Record<string, string> = {
   'Charlas, talleres y misiones también cuentan. En el Reto Escuelas Verdes no gana quien junta más basura: se suman los cuatro indicadores.':
     'Talks, workshops and missions count too. In the Green Schools Challenge the winner isn’t whoever collects the most trash: all four indicators add up.',
   'Toda la comunidad': 'The whole community',
-  'Hoteles, restaurantes, comercios y operadores turísticos se suman al cuidado del destino. Una vez al mes, la Gran Jornada Bayahibe Verde reúne a todos.':
-    'Hotels, restaurants, shops and tour operators join in caring for the destination. Once a month, the Great Bayahibe Verde Day brings everyone together.',
+  'Hoteles, restaurantes, comercios y operadores turísticos se suman al cuidado del destino. Una vez al mes, la Gran Jornada “Mi casa, mi mar” reúne a todos.':
+    'Hotels, restaurants, shops and tour operators join in caring for the destination. Once a month, the Great “Mi casa, mi mar” Day brings everyone together.',
   Hoteles: 'Hotels',
   'Patrocinan materiales y aportan los premios del Pasaporte Verde, como estadías para las familias.':
     'They sponsor supplies and provide the Green Passport prizes, such as stays for families.',
@@ -233,20 +234,20 @@ export const EN: Record<string, string> = {
   'Patrocinio de materiales, puntos de depósito para reciclaje y premios para el Pasaporte Verde.':
     'Sponsor supplies, host a recycling drop-off point and provide Green Passport prizes.',
   'Quiero ser voluntario/a': 'I want to volunteer',
-  'Acompaña las jornadas y la Gran Jornada Bayahibe Verde.': 'Support the clean-ups and the Great Bayahibe Verde Day.',
+  'Acompaña las jornadas y la Gran Jornada “Mi casa, mi mar”.': 'Support the clean-ups and the Great “Mi casa, mi mar” Day.',
   '¿Quieres ayudar desde donde estés?': 'Want to help from wherever you are?',
   'Tu aporte se convierte en guantes, bolsas y materiales para las brigadas escolares.':
     'Your donation becomes gloves, bags and supplies for the school brigades.',
   'Guardianes de Bayahibe': 'Guardians of Bayahibe',
   'Aprendemos a cuidar. Salimos a proteger. Bayahibe nos necesita.':
     'We learn to care. We go out to protect. Bayahibe needs us.',
-  'Colabora con Bayahibe Verde': 'Support Bayahibe Verde',
+  'Colabora con Mi casa, mi mar': 'Support Mi casa, mi mar',
   'Cada aporte se convierte en materiales para las brigadas escolares y se informa públicamente en qué se usó.':
     'Every donation becomes supplies for the school brigades, and we publicly report how it was used.',
   'Guantes y pinzas': 'Gloves and grabbers',
   'Bolsas diferenciadas': 'Sorting bags',
   'Chalecos y botiquín': 'Vests and first-aid kit',
-  'Material para las escuelas': 'School materials',
+  'Indumentaria para los guardianes': 'Clothing for the guardians',
   'Transferencia bancaria': 'Bank transfer',
   'Desde República Dominicana': 'From the Dominican Republic',
   'Desde el exterior': 'From abroad',

@@ -7,7 +7,7 @@ import { useReveal } from './useReveal';
 const WAYS = [
   { title: 'Soy una escuela', text: 'Formen su Brigada Ambiental y súmense a la rotación de jornadas.' },
   { title: 'Tengo un comercio u hotel', text: 'Patrocinio de materiales, puntos de depósito para reciclaje y premios para el Pasaporte Verde.' },
-  { title: 'Quiero ser voluntario/a', text: 'Acompaña las jornadas y la Gran Jornada Bayahibe Verde.' },
+  { title: 'Quiero ser voluntario/a', text: 'Acompaña las jornadas y la Gran Jornada “Mi casa, mi mar”.' },
 ];
 
 export default function Join() {
@@ -44,7 +44,7 @@ export default function Join() {
         </div>
 
         <footer className="foot" data-reveal>
-          <span>BAYAHIBE VERDE · {t('Guardianes de Bayahibe')}</span>
+          <span>MI CASA, MI MAR · {t('Guardianes de Bayahibe')}</span>
           <span>{t('Aprendemos a cuidar. Salimos a proteger. Bayahibe nos necesita.')}</span>
         </footer>
       </div>

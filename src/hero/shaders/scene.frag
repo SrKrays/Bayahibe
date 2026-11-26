@@ -31,6 +31,7 @@ uniform sampler2D uMask;   // R mar · G vegetación · B cielo
 uniform sampler2D uZones;  // R zona basura · G zona props · B "día" de aparición de cada objeto de basura
 uniform sampler2D uTrash;  // capas de basura (premultiplicadas)
 uniform sampler2D uProps;  // props del Acto 4 (premultiplicados)
+uniform sampler2D uPeople; // gente limpiando (Acto 3 → 4, premultiplicada)
 
 uniform float uTime;          // tiempo de escena (se acelera en el time-lapse)
 uniform vec3  uAmp;           // intensidad: mar · palmeras · cielo
@@ -40,6 +41,8 @@ uniform vec4  uSkyInfo;       // x = alto del cielo (fracción de la imagen) · 
 uniform float uTrashAmount;        // 0..1 cuánta basura hay (escalonado: time-lapse)
 uniform float uNight;         // 0..1 oscuridad de "noche" durante el time-lapse
 uniform float uRewind;        // 0..1 efecto de cinta rebobinando (Acto 3 → 4)
+uniform float uPeopleAmount;  // 0..1 gente limpiando
+uniform float uFlash;         // 0..1 destello del "¡pum!" final
 uniform vec4  uPropsReveal;   // manglares · tachos · estación · (libre)
 uniform float uAltMix;        // 0 = limpio · 1 = 2036
 uniform float uSun;           // 0..1 sol (sombras de nubes + rayos)
@@ -168,6 +171,16 @@ void main() {
     col = col * (1.0 - trash.a) + trash.rgb;
   }
 
+  // ======================= GENTE LIMPIANDO (Acto 3 → 4) =====================
+  // Aparecen subiendo desde abajo y se mueven como agachándose a juntar basura.
+  if (uPeopleAmount > 0.001) {
+    float bend = sin(t * 3.4 + uv.x * 26.0) * 0.0022;            // vaivén de agacharse
+    float rise = (1.0 - smoothstep(0.0, 1.0, uPeopleAmount)) * 0.02; // entran desde abajo
+    vec4 pp = texture(uPeople, duv + vec2(0.0, bend + rise));
+    float k = smoothstep(0.0, 0.6, uPeopleAmount);
+    col = col * (1.0 - pp.a * k) + pp.rgb * k;
+  }
+
   // ======================= PROPS (Acto 4) ===================================
   if (dot(uPropsReveal, vec4(1.0)) > 0.001) {
     vec2 z = texture(uZones, uv).rg;
@@ -224,6 +237,12 @@ void main() {
 
   vec2 v = vUV - 0.5;
   col *= 1.0 - dot(v, v) * 0.45;
+
+  // "¡pum!": destello cálido que tapa el cambio al Bayahibe recuperado
+  if (uFlash > 0.001) {
+    float glow = 1.0 - length(v) * 0.9;
+    col = mix(col, vec3(1.0, 0.98, 0.9), clamp(uFlash * (0.75 + glow * 0.35), 0.0, 1.0));
+  }
 
   finalColor = vec4(clamp(col, 0.0, 1.0), 1.0);
 }
